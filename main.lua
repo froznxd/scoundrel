@@ -1,23 +1,36 @@
+Timer = require "packages.hump.timer"
+
 local Card = require("card")
 local spritesheet = require("spritesheet")
 local constants = require("constants")
 local gameDetails = require("game-details")
 local Deck = require("deck")
+local Slots = require("slots")
 
 local sheet
-local cards = {}
+local deckOfCards = {}
 local draggedCard = nil
 local slots = {}
-local button = {}
+local buttons = {}
 local tableCards = {}
 local discardedCards = {}
 
 local function drawCardsOnTable()
+	for _, cardToDiscard in ipairs(tableCards) do
+		table.insert(discardedCards, cardToDiscard)
+	end
+	tableCards = {}
+
 	for i = 1, 4 do
-		if #cards == 0 then break end
-		local card = table.remove(cards, 1)
-		card:moveCardToPosition(slots[i].x, slots[i].y)
-		tableCards[#tableCards + 1] = card
+		if #deckOfCards == 0 then
+			slots[i].card = nil
+		else
+			local card = table.remove(deckOfCards, 1)
+			card:moveCardToPosition(slots[i].x, slots[i].y)
+			slots[i].card = card
+			card:flipCardUp()
+			tableCards[#tableCards + 1] = card
+		end
 	end
 end
 
@@ -25,44 +38,37 @@ function love.load()
 	gameDetails.loadGameDetails()
 	sheet = spritesheet.load("assets/cards sprite.png")
 
-	-- cards
-	local cardW = Card:getCardWidth(sheet)
-	local cardH = Card:getCardHeight(sheet)
+	-- card dimensions
+	local cardWidth = Card:getCardWidth(sheet)
+	local cardHeight = Card:getCardHeight(sheet)
 
-	-- screen
-	local screenW = love.graphics.getWidth()
-	local screenH = love.graphics.getHeight()
+	-- screen dimensions
+	local screenWidth = love.graphics.getWidth()
+	local screenHeight = love.graphics.getHeight()
 
-	-- slots
+	-- slot dimensions
 	local slotSpacing = constants.SLOT_SPACING
-	local totalSlotsWidth = 4 * cardW + 3 * slotSpacing
-	local slotStartX = (screenW - totalSlotsWidth) / 2
-	local slotStartY = screenH - cardH - 600
+	local totalSlotsWidth = (4 * cardWidth) + (3 * slotSpacing)
+	local slotStartX = (screenWidth - totalSlotsWidth) / 2
+	local slotStartY = screenHeight - cardHeight - 600
 
 	-- create slots
-	for i = 0, 3 do
-		slots[i + 1] = {
-			x = slotStartX + i * (cardW + slotSpacing),
-			y = slotStartY,
-			w = cardW,
-			h = cardH
-		}
-	end
+	slots = Slots.createSlots(slotStartX, slotStartY, cardWidth, cardHeight, slotSpacing)
 
 	-- generate a shuffled deck
-	cards = Deck.new(sheet)
-	cards = Deck.shuffleDeck(cards)
+	deckOfCards = Deck.new(sheet)
+	deckOfCards = Deck.shuffleDeck(deckOfCards)
 
 	-- button
-	button = {
-		text = "draw cards",
+	buttons.nextRoom = {
+		text = "Next room!",
 		w = 120,
 		h = 40,
 		x = love.graphics.getWidth() - 120 - 20,
 		y = 20,
-		color = { 0.25, 0.25, 0.25 },
-		hoverColor = { 0.35, 0.35, 0.35 },
-		textColor = { 1, 1, 1 },
+		color = constants.GREEN_COLOR,
+		hoverColor = constants.GREEN_HOVER_COLOR,
+		textColor = constants.WHITE_COLOR,
 		hovered = false,
 		onClick = function()
 			drawCardsOnTable()
@@ -71,42 +77,47 @@ function love.load()
 end
 
 function love.draw()
-	for _, slot in ipairs(slots) do
-		love.graphics.setColor(1, 1, 1, 0.3)
-		love.graphics.rectangle("line", slot.x, slot.y, slot.w, slot.h, 6, 6)
-	end
-	love.graphics.setColor(1, 1, 1, 1)
+	-- draw slots
+	Slots.drawSlots(slots)
 
-	Deck.drawDeck(cards)
+	-- draw deck of cards
+	Deck.drawDeck(deckOfCards)
 
+	-- draw table cards
 	for _, c in ipairs(tableCards) do
 		c:draw()
 	end
 
-	-- draw button
-	local bg = button.hovered and button.hoverColor or button.color
+	-- draw card class on slots
+	Slots.drawCardClassOnSlot(slots)
+
+	-- draw next room button
+	local nextRoomBtn = buttons.nextRoom
+	local bg = nextRoomBtn.hovered and nextRoomBtn.hoverColor or nextRoomBtn.color
 	love.graphics.setColor(bg)
-	love.graphics.rectangle("fill", button.x, button.y, button.w, button.h, 8, 8)
-	love.graphics.setColor(button.textColor)
+	love.graphics.rectangle("fill", nextRoomBtn.x, nextRoomBtn.y, nextRoomBtn.w, nextRoomBtn.h, 8, 8)
+	love.graphics.setColor(nextRoomBtn.textColor)
 	local font = love.graphics.getFont()
-	local tw = font:getWidth(button.text)
+	local tw = font:getWidth(nextRoomBtn.text)
 	local th = font:getHeight()
-	love.graphics.print(button.text, button.x + (button.w - tw) / 2, button.y + (button.h - th) / 2)
+	love.graphics.print(nextRoomBtn.text, nextRoomBtn.x + (nextRoomBtn.w - tw) / 2,
+		nextRoomBtn.y + (nextRoomBtn.h - th) / 2)
 	love.graphics.setColor(1, 1, 1, 1)
 end
 
 function love.mousepressed(x, y, btn)
 	if btn ~= 1 then return end
 
-	if x > button.x and x < button.x + button.w
-		and y > button.y and y < button.y + button.h
+	if x > buttons.nextRoom.x and x < buttons.nextRoom.x + buttons.nextRoom.w
+		and y > buttons.nextRoom.y and y < buttons.nextRoom.y + buttons.nextRoom.h
 	then
-		button.onClick()
+		buttons.nextRoom.onClick()
 		return
 	end
 
-	for i = #cards, 1, -1 do
-		local c = cards[i]
+	-- drag cards on mouse click
+	for i = #deckOfCards, 1, -1 do
+		local c = deckOfCards[i]
 		if x > c.x and x < c.x + c.width
 			and y > c.y and y < c.y + c.height
 		then
@@ -114,8 +125,8 @@ function love.mousepressed(x, y, btn)
 			c.dragging.active = true
 			c.dragging.diffX = x - c.x
 			c.dragging.diffY = y - c.y
-			table.remove(cards, i)
-			cards[#cards + 1] = c
+			table.remove(deckOfCards, i)
+			deckOfCards[#deckOfCards + 1] = c
 			break
 		end
 	end
@@ -130,11 +141,13 @@ function love.mousereleased(x, y, btn)
 end
 
 function love.update(dt)
-	local mx, my = love.mouse.getPosition()
-	button.hovered = mx > button.x and mx < button.x + button.w
-		and my > button.y and my < button.y + button.h
+	Timer.update(dt)
 
-	for _, c in ipairs(cards) do
+	local mx, my = love.mouse.getPosition()
+	buttons.nextRoom.hovered = mx > buttons.nextRoom.x and mx < buttons.nextRoom.x + buttons.nextRoom.w
+		and my > buttons.nextRoom.y and my < buttons.nextRoom.y + buttons.nextRoom.h
+
+	for _, c in ipairs(deckOfCards) do
 		c:update(dt)
 	end
 

@@ -10,7 +10,7 @@ function Deck.new(cardSheet)
     local self = setmetatable({}, Deck)
     local cards = {}
     for i, tc in ipairs(deckTable) do
-        local c = Card.new(cardSheet, tc.suit, tc.rank, 40 + i * 0.1, 40 + i * 0.1)
+        local c = Card.new(cardSheet, tc.suit, tc.rank, tc.class, 40 + i * 0.1, 40 + i * 0.1)
         cards[#cards + 1] = c
     end
 

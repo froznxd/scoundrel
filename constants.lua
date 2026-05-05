@@ -62,6 +62,18 @@ return {
         { suit = "clubs",    rank = "3",  class = "monster" },
         { suit = "clubs",    rank = "2",  class = "monster" },
         { suit = "clubs",    rank = "A",  class = "monster" },
-    }
+    },
 
+    -- button colors
+    GREEN_COLOR = { 0.25, 0.75, 0.25 },
+    GREEN_HOVER_COLOR = { 0.35, 0.85, 0.35 },
+    RED_COLOR = { 0.75, 0.25, 0.25 },
+    RED_HOVER_COLOR = { 0.85, 0.35, 0.35 },
+    BLUE_COLOR = { 0.25, 0.25, 0.75 },
+    BLUE_HOVER_COLOR = { 0.35, 0.35, 0.85 },
+    YELLOW_COLOR = { 0.75, 0.75, 0.25 },
+    YELLOW_HOVER_COLOR = { 0.85, 0.85, 0.35 },
+    PURPLE_COLOR = { 0.5, 0.25, 0.5 },
+    PURPLE_HOVER_COLOR = { 0.6, 0.35, 0.6 },
+    WHITE_COLOR = { 1, 1, 1 },
 }

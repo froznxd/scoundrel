@@ -1,14 +1,15 @@
-local Card = {}
-Card.__index = Card
-
 local constants = require("constants")
 local utils = require("utils")
 
-function Card.new(sheet, suit, rank, x, y)
+local Card = {}
+Card.__index = Card
+
+function Card.new(sheet, suit, rank, class, x, y)
     local self = setmetatable({}, Card)
     self.sheet = sheet
     self.suit = suit
     self.rank = rank
+    self.class = class
     self.quad = sheet.quads[suit][rank]
     self.x = x
     self.y = y
@@ -19,7 +20,7 @@ function Card.new(sheet, suit, rank, x, y)
     self.isDraggable = true
     self.width = sheet.cardW * constants.CARD_BASE_SCALE
     self.height = sheet.cardH * constants.CARD_BASE_SCALE
-    self.faceUp = true
+    self.faceUp = false
     return self
 end
 
@@ -33,16 +34,14 @@ function Card:draw()
 end
 
 function Card:update(dt)
-    if self.isDraggable then
-        if self.dragging.active then
-            self.targetX = love.mouse.getX() - self.dragging.diffX
-            self.targetY = love.mouse.getY() - self.dragging.diffY
-        end
-
-        local t = math.min(1, constants.CARD_LERP_SPEED * dt)
-        self.x = utils.lerp(self.x, self.targetX, t)
-        self.y = utils.lerp(self.y, self.targetY, t)
+    if self.dragging.active then
+        self.targetX = love.mouse.getX() - self.dragging.diffX
+        self.targetY = love.mouse.getY() - self.dragging.diffY
     end
+
+    local t = math.min(1, constants.CARD_LERP_SPEED * dt)
+    self.x = utils.lerp(self.x, self.targetX, t)
+    self.y = utils.lerp(self.y, self.targetY, t)
 end
 
 function Card:snapToSlot(slots)
@@ -82,6 +81,14 @@ function Card:moveCardToPosition(x, y)
     self.dragging.active = false
     self.dragging.diffX = 0
     self.dragging.diffY = 0
+end
+
+function Card:flipCardUp()
+    self.faceUp = true
+end
+
+function Card:flipCardDown()
+    self.faceUp = false
 end
 
 return Card
