@@ -1,8 +1,8 @@
 local Deck = {}
 Deck.__index = Deck
 
-local Card = require("card")
-local constants = require("constants")
+local Card = require("src.class.card")
+local constants = require("src.constants")
 
 local deckTable = constants.DECK_CARDS
 
@@ -14,23 +14,22 @@ function Deck.new(cardSheet)
         cards[#cards + 1] = c
     end
 
-    self.deck = cards
-    return self.deck
+    self.cards = cards
+    return self
 end
 
-function Deck.drawDeck(cards)
-    for _, c in ipairs(cards) do
+function Deck:draw()
+    for _, c in ipairs(self.cards) do
         c:draw()
     end
 end
 
-function Deck.shuffleDeck(cards)
-    for i = #cards, 2, -1 do
+function Deck:shuffleDeck()
+    local deck = self.cards
+    for i = #deck, 2, -1 do
         local j = math.random(i)
-        cards[i], cards[j] = cards[j], cards[i]
+        deck[i], deck[j] = deck[j], deck[i]
     end
-
-    return cards
 end
 
 return Deck

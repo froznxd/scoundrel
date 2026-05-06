@@ -1,9 +1,18 @@
-local constants = require("constants")
-local utils = require("utils")
+local constants = require("src.constants")
+local utils = require("src.utils")
+require("src.types")
 
 local Card = {}
 Card.__index = Card
 
+---Creates a new instance of Card
+---@param sheet Spritesheet
+---@param suit Suit
+---@param rank Rank
+---@param class CardClass
+---@param x number
+---@param y number
+---@return Card
 function Card.new(sheet, suit, rank, class, x, y)
     local self = setmetatable({}, Card)
     self.sheet = sheet
@@ -24,6 +33,7 @@ function Card.new(sheet, suit, rank, class, x, y)
     return self
 end
 
+---Draws the card
 function Card:draw()
     local quad = self.faceUp and self.quad or self.sheet.back
     local w = self.sheet.cardW * self.scale
@@ -33,6 +43,8 @@ function Card:draw()
     love.graphics.draw(self.sheet.image, quad, self.x + w / 2, self.y + h / 2, 0, self.scale, self.scale, ox, oy)
 end
 
+---Updates the card
+---@param dt number
 function Card:update(dt)
     if self.dragging.active then
         self.targetX = love.mouse.getX() - self.dragging.diffX
@@ -44,6 +56,8 @@ function Card:update(dt)
     self.y = utils.lerp(self.y, self.targetY, t)
 end
 
+---Snaps the card to the closest slot
+---@param slots Slots
 function Card:snapToSlot(slots)
     local cardCX = self.targetX + self.width / 2
     local cardCY = self.targetY + self.height / 2
@@ -67,14 +81,23 @@ function Card:snapToSlot(slots)
     end
 end
 
+---Gets the width of the card
+---@param sheet Spritesheet
+---@return number
 function Card:getCardWidth(sheet)
     return sheet.cardW * constants.CARD_BASE_SCALE
 end
 
+---Gets the height of the card
+---@param sheet Spritesheet
+---@return number
 function Card:getCardHeight(sheet)
     return sheet.cardH * constants.CARD_BASE_SCALE
 end
 
+---Moves the card to a position
+---@param x number
+---@param y number
 function Card:moveCardToPosition(x, y)
     self.targetX = x
     self.targetY = y
@@ -83,10 +106,12 @@ function Card:moveCardToPosition(x, y)
     self.dragging.diffY = 0
 end
 
+---Flips the card up
 function Card:flipCardUp()
     self.faceUp = true
 end
 
+---Flips the card down
 function Card:flipCardDown()
     self.faceUp = false
 end

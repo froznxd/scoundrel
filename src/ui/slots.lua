@@ -1,8 +1,12 @@
-local Slots = {}
-
+---@param slotStartX number
+---@param slotStartY number
+---@param cardWidth number
+---@param cardHeight number
+---@param slotSpacing number
 local function createSlots(slotStartX, slotStartY, cardWidth, cardHeight, slotSpacing)
+    local slots = {}
     for i = 0, 3 do
-        Slots[i + 1] = {
+        slots[i + 1] = {
             x = slotStartX + i * (cardWidth + slotSpacing),
             y = slotStartY,
             w = cardWidth,
@@ -11,7 +15,7 @@ local function createSlots(slotStartX, slotStartY, cardWidth, cardHeight, slotSp
         }
     end
 
-    return Slots
+    return slots
 end
 
 local function drawSlots(slotsToDraw)
