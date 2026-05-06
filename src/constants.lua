@@ -1,4 +1,8 @@
 return {
+    -- player
+    PLAYER_HP = 20,
+
+    -- card
     CARD_BASE_SCALE = 2.5,
     CARD_DRAG_SCALE = 2.6,
     CARD_LERP_SPEED = 20,

@@ -16,9 +16,13 @@ function Player.new(hp, weapon)
     return self
 end
 
+---register damage to the player
+---@param damage number
 function Player:takeDamage(damage)
     local currentHP = self.hp
 
     self.hp = currentHP - damage
     if (currentHP < 0) then self.hp = 0 end
 end
+
+return Player

@@ -4,6 +4,8 @@ local constants = require("src.constants")
 local buttons = require("src.ui.buttons")
 local Deck = require("src.class.deck")
 local Slots = require("src.ui.slots")
+local commonUi = require("src.ui.common")
+local Player = require("src.class.player")
 
 local Game = {}
 Game.__index = Game
@@ -27,23 +29,24 @@ function Game.new()
 
     self.deck = Deck.new(sheet)
     self.deck:shuffleDeck()
+    self.player = Player.new(constants.PLAYER_HP, 0)
 
-    self.tableCards = {}
+    self.roomCards = {}
     self.discardedCards = {}
     self.draggedCard = nil
 
     self.buttons = {}
-    self.buttons.nextRoom = buttons.nextRoom(function() self:drawCardsToSlot() end)
+    self.buttons.nextRoom = buttons.nextRoom(function() self:newRoom() end)
 
     return self
 end
 
 ---draws the card to slots
-function Game:drawCardsToSlot()
-    for _, card in ipairs(self.tableCards) do
+function Game:newRoom()
+    for _, card in ipairs(self.roomCards) do
         table.insert(self.discardedCards, card)
     end
-    self.tableCards = {}
+    self.roomCards = {}
 
     for i = 1, 4 do
         if #self.deck.cards == 0 then
@@ -53,7 +56,7 @@ function Game:drawCardsToSlot()
             card:moveCardToPosition(self.slots[i].x, self.slots[i].y)
             self.slots[i].card = card
             card:flipCardUp()
-            self.tableCards[#self.tableCards + 1] = card
+            self.roomCards[#self.roomCards + 1] = card
         end
     end
 end
@@ -68,22 +71,28 @@ function Game:update(dt)
         c:update(dt)
     end
 
-    for _, c in ipairs(self.tableCards) do
+    for _, c in ipairs(self.roomCards) do
         c:update(dt)
     end
 end
 
 function Game:draw()
+    -- draw slots
     Slots.drawSlots(self.slots)
+    Slots.drawCardClassOnSlot(self.slots)
 
+    -- draw deck of cards
     self.deck:draw()
 
-    for _, c in ipairs(self.tableCards) do
+    -- draw room cards
+    for _, c in ipairs(self.roomCards) do
         c:draw()
     end
 
-    Slots.drawCardClassOnSlot(self.slots)
+    -- draw common UI
+    commonUi.drawHP(self.player.hp)
 
+    -- TODO: refactor this
     local nextRoomBtn = self.buttons.nextRoom
     local bg = nextRoomBtn.hovered and nextRoomBtn.hoverColor or nextRoomBtn.color
     love.graphics.setColor(bg)
