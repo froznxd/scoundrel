@@ -19,6 +19,7 @@ function Card.new(sheet, suit, rank, class, x, y)
     self.suit = suit
     self.rank = rank
     self.class = class
+    self.value = constants.VALUE_MAP[rank]
     self.quad = sheet.quads[suit][rank]
     self.x = x
     self.y = y

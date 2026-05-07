@@ -31,6 +31,7 @@
 ---@field sheet Spritesheet
 ---@field suit Suit
 ---@field rank Rank
+---@field value number
 ---@field class CardClass
 ---@field quad love.Quad
 ---@field x number

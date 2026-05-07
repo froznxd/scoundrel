@@ -3,7 +3,7 @@ local spritesheet = require("src.systems.spritesheet")
 local constants = require("src.constants")
 local buttons = require("src.ui.buttons")
 local Deck = require("src.class.deck")
-local Slots = require("src.ui.slots")
+local Slots = require("src.systems.room")
 local commonUi = require("src.ui.common")
 local Player = require("src.class.player")
 
@@ -25,13 +25,12 @@ function Game.new()
     local slotStartX = (screenWidth - totalSlotsWidth) / 2
     local slotStartY = screenHeight - cardHeight - 600
 
-    self.slots = Slots.createSlots(slotStartX, slotStartY, cardWidth, cardHeight, slotSpacing)
+    self.roomSlots = Slots.createSlots(slotStartX, slotStartY, cardWidth, cardHeight, slotSpacing)
 
     self.deck = Deck.new(sheet)
     self.deck:shuffleDeck()
-    self.player = Player.new(constants.PLAYER_HP, 0)
+    self.player = Player.new(constants.PLAYER_MAX_HP, 0)
 
-    self.roomCards = {}
     self.discardedCards = {}
     self.draggedCard = nil
 
@@ -43,22 +42,38 @@ end
 
 ---draws the card to slots
 function Game:newRoom()
-    for _, card in ipairs(self.roomCards) do
-        table.insert(self.discardedCards, card)
+    for _, slot in ipairs(self.roomSlots) do
+        table.insert(self.discardedCards, slot.card)
+        self.roomSlots.card = nil
     end
-    self.roomCards = {}
 
     for i = 1, 4 do
         if #self.deck.cards == 0 then
-            self.slots[i].card = nil
+            self.roomSlots[i].card = nil
         else
             local card = table.remove(self.deck.cards, 1)
-            card:moveCardToPosition(self.slots[i].x, self.slots[i].y)
-            self.slots[i].card = card
+            card:moveCardToPosition(self.roomSlots[i].x, self.roomSlots[i].y)
+            self.roomSlots[i].card = card
             card:flipCardUp()
-            self.roomCards[#self.roomCards + 1] = card
+            self.roomSlots[i].card = card
         end
     end
+end
+
+function Game:onSlotCardClicked(slotIndex, card)
+    if card.class == constants.CLASSES.MONSTER then
+        -- player takes damage
+        self.player:takeDamage(card)
+    elseif card.class == constants.CLASSES.HEALTH then
+        -- heal the player
+        self.player:heal(card)
+    elseif card.class == constants.CLASSES.WEAPON then
+        -- equip the weapon
+        self.player:equipWeapon(card)
+    end
+    -- remove card from slot after interaction
+    self.roomSlots[slotIndex].card = nil
+    -- optionally move it to discardedCards, animate it off-screen, etc.
 end
 
 function Game:update(dt)
@@ -71,22 +86,22 @@ function Game:update(dt)
         c:update(dt)
     end
 
-    for _, c in ipairs(self.roomCards) do
-        c:update(dt)
+    for _, slot in ipairs(self.roomSlots) do
+        if slot.card then slot.card:update(dt) end
     end
 end
 
 function Game:draw()
     -- draw slots
-    Slots.drawSlots(self.slots)
-    Slots.drawCardClassOnSlot(self.slots)
+    Slots.drawSlots(self.roomSlots)
+    Slots.drawCardClassOnSlot(self.roomSlots)
 
     -- draw deck of cards
     self.deck:draw()
 
     -- draw room cards
-    for _, c in ipairs(self.roomCards) do
-        c:draw()
+    for _, slot in ipairs(self.roomSlots) do
+        if slot.card then slot.card:draw() end
     end
 
     -- draw common UI
@@ -110,6 +125,8 @@ function Game:mousepressed(x, y, btn)
     if btn ~= 1 then return end
 
     local nextRoomBtn = self.buttons.nextRoom
+
+    -- next room button handler
     if x > nextRoomBtn.x and x < nextRoomBtn.x + nextRoomBtn.w
         and y > nextRoomBtn.y and y < nextRoomBtn.y + nextRoomBtn.h
     then
@@ -131,11 +148,20 @@ function Game:mousepressed(x, y, btn)
             break
         end
     end
+
+    -- room actions
+    for i, slot in ipairs(self.roomSlots) do
+        if slot.card and x > slot.x and x < slot.x + slot.w
+            and y > slot.y and y < slot.y + slot.h then
+            self:onSlotCardClicked(i, slot.card)
+            return
+        end
+    end
 end
 
 function Game:mousereleased(x, y, btn)
     if btn == 1 and self.draggedCard then
-        self.draggedCard:snapToSlot(self.slots)
+        self.draggedCard:snapToSlot(self.roomSlots)
         self.draggedCard.dragging.active = false
         self.draggedCard = nil
     end
