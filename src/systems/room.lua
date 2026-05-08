@@ -1,3 +1,4 @@
+local constants = require("src.constants")
 ---@param slotStartX number
 ---@param slotStartY number
 ---@param cardWidth number
@@ -16,6 +17,15 @@ local function createSlots(slotStartX, slotStartY, cardWidth, cardHeight, slotSp
     end
 
     return slots
+end
+
+local function createWeaponSlot(x, y, cardWidth, cardHeight)
+    return {
+        x = x,
+        y = y,
+        w = cardWidth,
+        h = cardHeight,
+    }
 end
 
 local function drawSlots(slotsToDraw)
@@ -37,8 +47,16 @@ local function drawCardClassOnSlot(slots)
     end
 end
 
+local function drawWeaponSlot(weaponSlot)
+    love.graphics.setColor(constants.BLUE_COLOR)
+    love.graphics.rectangle("line", weaponSlot.x, weaponSlot.y, weaponSlot.w, weaponSlot.h, 6, 6)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
 return {
     createSlots = createSlots,
     drawSlots = drawSlots,
-    drawCardClassOnSlot = drawCardClassOnSlot
+    drawCardClassOnSlot = drawCardClassOnSlot,
+    createWeaponSlot = createWeaponSlot,
+    drawWeaponSlot = drawWeaponSlot
 }

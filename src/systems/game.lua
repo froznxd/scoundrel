@@ -25,11 +25,15 @@ function Game.new()
     local slotStartX = (screenWidth - totalSlotsWidth) / 2
     local slotStartY = screenHeight - cardHeight - 600
 
+    local weaponSlotX = (screenWidth - cardWidth) / 2
+    local weaponSlotY = screenHeight - cardHeight - 200
+
     self.roomSlots = Slots.createSlots(slotStartX, slotStartY, cardWidth, cardHeight, slotSpacing)
+    self.weaponSlot = Slots.createWeaponSlot(weaponSlotX, weaponSlotY, cardWidth, cardHeight)
 
     self.deck = Deck.new(sheet)
     self.deck:shuffleDeck()
-    self.player = Player.new(constants.PLAYER_MAX_HP, 0)
+    self.player = Player.new(constants.PLAYER_MAX_HP, nil)
 
     self.discardedCards = {}
     self.draggedCard = nil
@@ -70,6 +74,7 @@ function Game:onSlotCardClicked(slotIndex, card)
     elseif card.class == constants.CLASSES.WEAPON then
         -- equip the weapon
         self.player:equipWeapon(card)
+        self.player.weapon:moveCardToPosition(self.weaponSlot.x, self.weaponSlot.y)
     end
     -- remove card from slot after interaction
     self.roomSlots[slotIndex].card = nil
@@ -89,6 +94,9 @@ function Game:update(dt)
     for _, slot in ipairs(self.roomSlots) do
         if slot.card then slot.card:update(dt) end
     end
+
+    -- lerp weapon card to weapon slot
+    if (self.player.weapon) then self.player.weapon:update(dt) end
 end
 
 function Game:draw()
@@ -104,8 +112,15 @@ function Game:draw()
         if slot.card then slot.card:draw() end
     end
 
+    -- draw weapon slot
+    Slots.drawWeaponSlot(self.weaponSlot)
+
     -- draw common UI
     commonUi.drawHP(self.player.hp)
+
+    -- draw weapon
+    if (self.player.weapon) then self.player.weapon:draw() end
+
 
     -- TODO: refactor this
     local nextRoomBtn = self.buttons.nextRoom

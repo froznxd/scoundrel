@@ -7,13 +7,14 @@ Player.__index = Player
 
 ---Creates a new instance of Player
 ---@param hp number
----@param weapon number
+---@param weapon Card|nil
 ---@return Player
 function Player.new(hp, weapon)
     local self = setmetatable({}, Player)
 
     self.hp = hp
     self.weapon = weapon
+    self.weaponDamage = 0
 
     return self
 end
@@ -49,7 +50,8 @@ end
 function Player:equipWeapon(card)
     if (card.class ~= constants.CLASSES.WEAPON) then return end
 
-    self.weapon = card.value
+    self.weapon = card
+    self.weaponDamage = card.value
 end
 
 return Player
