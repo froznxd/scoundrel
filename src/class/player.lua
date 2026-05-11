@@ -15,6 +15,7 @@ function Player.new(hp, weapon)
     self.hp = hp
     self.weapon = weapon
     self.weaponDamage = 0
+    self.isWeaponEquipped = false
 
     return self
 end
@@ -24,10 +25,19 @@ end
 function Player:takeDamage(card)
     if (card.class ~= constants.CLASSES.MONSTER) then return end
 
-    local damage = card.value
+    local monsterDamage = card.value
     local currentHP = self.hp
+    local weaponDamage = self.weaponDamage
 
-    self.hp = currentHP - damage
+    local totalDamage = 0
+
+    if (monsterDamage <= weaponDamage) then
+        totalDamage = 0
+    else
+        totalDamage = monsterDamage - weaponDamage
+    end
+
+    self.hp = currentHP - totalDamage
     if (self.hp < 0) then self.hp = 0 end
 end
 
@@ -52,6 +62,7 @@ function Player:equipWeapon(card)
 
     self.weapon = card
     self.weaponDamage = card.value
+    self.isWeaponEquipped = true
 end
 
 return Player

@@ -7,10 +7,10 @@
 
 ---@class Spritesheet
 ---@field image love.Image
+---@field backImage love.Image
 ---@field cardW number
 ---@field cardH number
 ---@field quads table<Suit, table<Rank, love.Quad>>
----@field back love.Quad
 
 ---@class Slot
 ---@field x number
@@ -48,3 +48,4 @@
 ---@class Player
 ---@field hp number
 ---@field weapon number
+---@field isWeaponEquipped boolean

@@ -1,10 +1,16 @@
 return {
+    -- font
+    FONT_PATH = "assets/m6x11.ttf",
+    FONT_SIZE_0 = 24,
+    FONT_SIZE_1 = 32,
+    FONT_SIZE_2 = 36,
+
     -- player
     PLAYER_MAX_HP = 20,
 
     -- card
-    CARD_BASE_SCALE = 2.5,
-    CARD_DRAG_SCALE = 2.6,
+    CARD_BASE_SCALE = 2,
+    CARD_DRAG_SCALE = 2,
     CARD_LERP_SPEED = 20,
     CARD_SCALE_LERP_SPEED = 32,
     CARD_SNAP_RADIUS = 100,
@@ -88,16 +94,35 @@ return {
         ["A"] = 14,
     },
 
-    -- button colors
-    GREEN_COLOR = { 0.25, 0.75, 0.25 },
-    GREEN_HOVER_COLOR = { 0.35, 0.85, 0.35 },
+    -- Green colors
+    GREEN_COLOR = { 20 / 255, 65 / 255, 44 / 255 },
+    GREEN_HOVER_COLOR = { 20 / 255, 80 / 255, 50 / 255 },
+    GREEN_TEXT_COLOR = { 200 / 255, 229 / 255, 190 / 255 },
+
+    -- Red colors
     RED_COLOR = { 0.75, 0.25, 0.25 },
     RED_HOVER_COLOR = { 0.85, 0.35, 0.35 },
-    BLUE_COLOR = { 0.25, 0.25, 0.75 },
-    BLUE_HOVER_COLOR = { 0.35, 0.35, 0.85 },
+
+    -- Blue colors
+    BLUE_COLOR = { 0 / 255, 45 / 255, 80 / 255 },
+    BLUE_HOVER_COLOR = { 0 / 255, 55 / 255, 90 / 255 },
+    BLUE_TEXT_COLOR = { 210 / 255, 235 / 255, 255 / 255 },
+
+    -- Yellow colors
     YELLOW_COLOR = { 0.75, 0.75, 0.25 },
     YELLOW_HOVER_COLOR = { 0.85, 0.85, 0.35 },
+
+    -- Gold
+    GOLD_COLOR = { 255 / 255, 170 / 255, 0 / 255 },
+    GOLD_HOVER_COLOR = { 255 / 255, 185 / 255, 0 / 255 },
+
+    -- Purple colors
     PURPLE_COLOR = { 0.5, 0.25, 0.5 },
     PURPLE_HOVER_COLOR = { 0.6, 0.35, 0.6 },
+
+    -- White color
     WHITE_COLOR = { 1, 1, 1 },
+
+    -- Gray color
+    GRAY_COLOR = { 169 / 255, 154 / 255, 147 / 255 },
 }

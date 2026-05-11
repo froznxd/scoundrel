@@ -36,12 +36,17 @@ end
 
 ---Draws the card
 function Card:draw()
-    local quad = self.faceUp and self.quad or self.sheet.back
-    local w = self.sheet.cardW * self.scale
-    local h = self.sheet.cardH * self.scale
-    local ox = self.sheet.cardW / 2
-    local oy = self.sheet.cardH / 2
-    love.graphics.draw(self.sheet.image, quad, self.x + w / 2, self.y + h / 2, 0, self.scale, self.scale, ox, oy)
+    local px = math.floor(self.x + 0.5)
+    local py = math.floor(self.y + 0.5)
+
+    if self.faceUp then
+        love.graphics.draw(self.sheet.image, self.quad, px, py, 0, self.scale, self.scale)
+    else
+        local backImg = self.sheet.backImage
+        local sx = (self.sheet.cardW * self.scale) / backImg:getWidth()
+        local sy = (self.sheet.cardH * self.scale) / backImg:getHeight()
+        love.graphics.draw(backImg, px, py, 0, sx, sy)
+    end
 end
 
 ---Updates the card

@@ -1,14 +1,14 @@
 local spritesheet = {}
 
-local COLS = 14
+local COLS = 13
 local ROWS = 4
 
-local SUITS = { "spades", "hearts", "clubs", "diamonds" }
-local RANKS = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }
+local SUITS = { "spades", "clubs", "hearts", "diamonds" }
+local RANKS = { "A", "K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2" }
 
-function spritesheet.load(path)
+function spritesheet.load(sheetPath, backPath)
     local sheet = {}
-    sheet.image = love.graphics.newImage(path)
+    sheet.image = love.graphics.newImage(sheetPath)
     sheet.image:setFilter("nearest", "nearest")
 
     local imgW = sheet.image:getWidth()
@@ -16,12 +16,10 @@ function spritesheet.load(path)
     sheet.cardW = imgW / COLS
     sheet.cardH = imgH / ROWS
 
+    sheet.backImage = love.graphics.newImage(backPath)
+    sheet.backImage:setFilter("nearest", "nearest")
+
     sheet.quads = {}
-    sheet.back = love.graphics.newQuad(
-        13 * sheet.cardW, 3 * sheet.cardH,
-        sheet.cardW, sheet.cardH,
-        imgW, imgH
-    )
 
     for row, suit in ipairs(SUITS) do
         sheet.quads[suit] = {}
@@ -42,7 +40,7 @@ function spritesheet.getQuad(sheet, suit, rank)
 end
 
 function spritesheet.getBack(sheet)
-    return sheet.back
+    return sheet.backImage
 end
 
 function spritesheet.getSuits()

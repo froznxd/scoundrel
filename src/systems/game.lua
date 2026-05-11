@@ -13,7 +13,7 @@ Game.__index = Game
 function Game.new()
     local self = setmetatable({}, Game)
 
-    local sheet = spritesheet.load("assets/cards sprite.png")
+    local sheet = spritesheet.load("assets/card_deck.png", "assets/card_back.png")
     local cardWidth = Card:getCardWidth(sheet)
     local cardHeight = Card:getCardHeight(sheet)
 
@@ -38,8 +38,11 @@ function Game.new()
     self.discardedCards = {}
     self.draggedCard = nil
 
+    self.background = love.graphics.newImage("assets/background.png")
+
     self.buttons = {}
     self.buttons.nextRoom = buttons.nextRoom(function() self:newRoom() end)
+    self.buttons.skipRoom = buttons.skipRoom(function() self:skipRoom() end)
 
     return self
 end
@@ -83,9 +86,13 @@ end
 
 function Game:update(dt)
     local mx, my = love.mouse.getPosition()
-    local btn = self.buttons.nextRoom
-    btn.hovered = mx > btn.x and mx < btn.x + btn.w
-        and my > btn.y and my < btn.y + btn.h
+    local nextRoomBtn = self.buttons.nextRoom
+    nextRoomBtn.hovered = mx > nextRoomBtn.x and mx < nextRoomBtn.x + nextRoomBtn.w
+        and my > nextRoomBtn.y and my < nextRoomBtn.y + nextRoomBtn.h
+
+    local skipRoomBtn = self.buttons.skipRoom
+    skipRoomBtn.hovered = mx > skipRoomBtn.x and mx < skipRoomBtn.x + skipRoomBtn.w
+        and my > skipRoomBtn.y and my < skipRoomBtn.y + skipRoomBtn.h
 
     for _, c in ipairs(self.deck.cards) do
         c:update(dt)
@@ -100,6 +107,12 @@ function Game:update(dt)
 end
 
 function Game:draw()
+    local screenW = love.graphics.getWidth()
+    local screenH = love.graphics.getHeight()
+    local sx = screenW / self.background:getWidth()
+    local sy = screenH / self.background:getHeight()
+    love.graphics.draw(self.background, 0, 0, 0, sx, sy)
+
     -- draw slots
     Slots.drawSlots(self.roomSlots)
     Slots.drawCardClassOnSlot(self.roomSlots)
@@ -113,7 +126,7 @@ function Game:draw()
     end
 
     -- draw weapon slot
-    Slots.drawWeaponSlot(self.weaponSlot)
+    Slots.drawWeaponSlot(self.weaponSlot, self.player.isWeaponEquipped)
 
     -- draw common UI
     commonUi.drawHP(self.player.hp)
@@ -124,15 +137,20 @@ function Game:draw()
 
     -- TODO: refactor this
     local nextRoomBtn = self.buttons.nextRoom
+    local skipRoomBtn = self.buttons.skipRoom
+
     local bg = nextRoomBtn.hovered and nextRoomBtn.hoverColor or nextRoomBtn.color
     love.graphics.setColor(bg)
     love.graphics.rectangle("fill", nextRoomBtn.x, nextRoomBtn.y, nextRoomBtn.w, nextRoomBtn.h, 8, 8)
     love.graphics.setColor(nextRoomBtn.textColor)
-    local font = love.graphics.getFont()
-    local tw = font:getWidth(nextRoomBtn.text)
-    local th = font:getHeight()
-    love.graphics.print(nextRoomBtn.text, nextRoomBtn.x + (nextRoomBtn.w - tw) / 2,
-        nextRoomBtn.y + (nextRoomBtn.h - th) / 2)
+    love.graphics.print(nextRoomBtn.text, nextRoomBtn.textX, nextRoomBtn.textY)
+
+    bg = skipRoomBtn.hovered and skipRoomBtn.hoverColor or skipRoomBtn.color
+    love.graphics.setColor(bg)
+    love.graphics.rectangle("fill", skipRoomBtn.x, skipRoomBtn.y, skipRoomBtn.w, skipRoomBtn.h, 8, 8)
+    love.graphics.setColor(skipRoomBtn.textColor)
+    love.graphics.print(skipRoomBtn.text, skipRoomBtn.textX, skipRoomBtn.textY)
+
     love.graphics.setColor(1, 1, 1, 1)
 end
 
